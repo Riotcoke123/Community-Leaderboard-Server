@@ -43,15 +43,6 @@ calculates weighted scores, and builds a live leaderboard using SQLite.
 
 <hr>
 
-<h2>Installation</h2>
-<pre>
-git clone https://github.com/yourusername/leaderboard-server.git
-cd leaderboard-server
-npm install
-</pre>
-
-<hr>
-
 <h2>Environment Variables</h2>
 <pre>
 PORT=3001
@@ -165,8 +156,37 @@ calculated_score = ceil(score_up × 3.14)
 
 <hr>
 
-<h2>License</h2>
-<p>MIT</p>
+<h2>📜 License</h2>
 
+<p>
+This project is licensed under the
+<strong>GNU General Public License v3.0 (GPL-3.0)</strong>.
+</p>
+
+<p>
+You are free to use, modify, and distribute this software under the terms of the GPL-3.0 license,
+provided that any derivative work is also distributed under the same license.
+</p>
+
+<p>
+Full license text available here:<br>
+<a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">
+https://www.gnu.org/licenses/gpl-3.0.en.html
+</a>
+</p>
+
+<p>
+📦 Source Code Repository:<br>
+<a href="https://github.com/Riotcoke123/Community-Leaderboard-Server" target="_blank">
+https://github.com/Riotcoke123/Community-Leaderboard-Server
+</a>
+</p>
+
+<p>
+This software is provided "as is", without warranty of any kind, express or implied,
+including but not limited to the warranties of merchantability, fitness for a particular purpose,
+and noninfringement. In no event shall the authors or copyright holders be liable for any claim,
+damages, or other liability arising from the use of this software.
+</p>
 </body>
 </html>
