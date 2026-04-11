@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spictank Leaderboard</title>
+
+    <!-- Security: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self';
+                   script-src 'self';
+                   style-src 'self' https://fonts.googleapis.com;
+                   font-src 'self' https://fonts.gstatic.com;
+                   img-src 'self' data:;
+                   connect-src 'self';
+                   object-src 'none';
+                   frame-ancestors 'none';">
+
+    <!-- Security: Referrer Policy -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
+    <!-- Security: prevent MIME sniffing -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+    <meta name="google-site-verification" content="Ri9_pNw14Ao-DhB8KDMKT0CD5ggmrCGN9XxCTV7sp24" />
+    <meta name="msvalidate.01" content="56D4F77FE078CB85FBCA391C0DF5D2B5" />
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Check the top contributors of the Spictank community leaderboard. View the latest posts, scores, and activity stats.">
+    <meta name="keywords" content="Spictank, leaderboard, community, contributors, posts, score, top users">
+    <meta name="author" content="Spictank">
+    <meta property="og:title" content="Spictank Leaderboard">
+    <meta property="og:description" content="Check the top contributors of the Spictank community leaderboard. View the latest posts, scores, and activity stats.">
+    <meta property="og:url" content="https://leaderboard.spictank.online/">
+    <meta property="og:image" content="/images/og-image.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Spictank Leaderboard">
+    <meta name="twitter:description" content="Check the top contributors of the Spictank community leaderboard. View the latest posts, scores, and activity stats.">
+    <meta name="twitter:image" content="/images/twitter-image.png">
+
+    <!-- Link to web manifest -->
+    <link rel="manifest" href="/site.webmanifest">
+
+    <!-- Link to fonts and stylesheet -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@300;400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Favicon and Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 Leaderboard 🏆</h1>
+            <div class="subtitle">Top Community Contributors</div>
+            <div class="link">
+                <a href="https://communities.win/c/spictank" target="_blank" rel="noopener noreferrer">
+                    Visit the Spictank Community
+                </a>
+            </div>
+            <div class="link">
+                <a href="https://communities.win/c/theNETWORK/" target="_blank" rel="noopener noreferrer">
+                    Visit the theNETWORK Community
+                </a>
+            </div>
+            <div class="link">
+                <a href="https://iceposeidon.network/" target="_blank" rel="noopener noreferrer">
+                    Streamerlist - Iceposeidon.Network
+                </a>
+            </div>
+            <div class="link">
+                <a href="mailto:riotcokemedia@iceposeidon.network">
+                    EMAIL US
+                </a>
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value" id="totalUsers">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Posts</div>
+                <div class="stat-value" id="totalPosts">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Score</div>
+                <div class="stat-value" id="totalScore">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Last Updated</div>
+                <div class="stat-value" id="lastUpdated">--</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-rank">#</th>
+                        <th class="col-username">Username</th>
+                        <th class="col-posts">Posts</th>
+                        <th class="col-active">Last Active</th>
+                        <th class="col-score">Score</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard">
+                    <tr><td colspan="5" class="loading">Loading leaderboard…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/js/leaderboard.js"></script>
+</body>
+</html>
