@@ -3,47 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Community Leaderboard Server</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
-      background: #0d1117;
-      color: #e6edf3;
-    }
-    h1, h2, h3 {
-      color: #58a6ff;
-    }
-    code, pre {
-      background: #161b22;
-      padding: 10px;
-      border-radius: 6px;
-      overflow-x: auto;
-      display: block;
-      color: #e6edf3;
-    }
-    a {
-      color: #79c0ff;
-    }
-    .box {
-      background: #161b22;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 10px 0;
-    }
-    hr {
-      border: 0;
-      border-top: 1px solid #30363d;
-      margin: 30px 0;
-    }
-  </style>
+
 </head>
 <body>
 
-<h1>📊 Community Leaderboard Server</h1>
+<h1>Community Leaderboard Server</h1>
 
 <p>
 A high-performance Node.js + Express backend that aggregates posts from multiple communities,
@@ -52,22 +16,22 @@ calculates weighted scores, and builds a live leaderboard using SQLite.
 
 <hr>
 
-<h2>🚀 Features</h2>
+<h2>Features</h2>
 <ul>
-  <li>📡 Auto-fetch posts from configured communities</li>
-  <li>🧮 Custom score calculation (score × 3.14)</li>
-  <li>🏆 Live aggregated leaderboard per author</li>
-  <li>🗄️ SQLite database with WAL mode</li>
-  <li>🔄 Auto-refresh every 70 seconds</li>
-  <li>💾 Automatic backups every 6 hours</li>
-  <li>🧑 Author tracking + eviction system</li>
-  <li>🔐 Secure admin API with secret auth</li>
-  <li>🛡️ Security hardening (Helmet, CORS, rate limits)</li>
+  <li>Auto-fetch posts from configured communities</li>
+  <li>Custom score calculation (score × 3.14)</li>
+  <li>Live aggregated leaderboard per author</li>
+  <li>SQLite database with WAL mode</li>
+  <li>Auto-refresh every 70 seconds</li>
+  <li>Automatic backups every 6 hours</li>
+  <li>Author tracking + eviction system</li>
+  <li>Secure admin API with secret auth</li>
+  <li>Security hardening (Helmet, CORS, rate limits)</li>
 </ul>
 
 <hr>
 
-<h2>📁 Project Structure</h2>
+<h2>Project Structure</h2>
 <pre>
 .
 ├── server.js
@@ -79,7 +43,7 @@ calculates weighted scores, and builds a live leaderboard using SQLite.
 
 <hr>
 
-<h2>⚙️ Installation</h2>
+<h2>Installation</h2>
 <pre>
 git clone https://github.com/yourusername/leaderboard-server.git
 cd leaderboard-server
@@ -88,7 +52,7 @@ npm install
 
 <hr>
 
-<h2>🔐 Environment Variables</h2>
+<h2>Environment Variables</h2>
 <pre>
 PORT=3001
 DB_PATH=./leaderboard.db
@@ -105,7 +69,7 @@ BACKUP_DIR=./backups
 
 <hr>
 
-<h2>▶️ Running the Server</h2>
+<h2>Running the Server</h2>
 <pre>
 node server.js
 </pre>
@@ -117,7 +81,7 @@ npx nodemon server.js
 
 <hr>
 
-<h2>📡 API Endpoints</h2>
+<h2>API Endpoints</h2>
 
 <h3>GET /api/leaderboard</h3>
 <div class="box">
@@ -148,7 +112,7 @@ Returns ranked authors by score.
 
 <hr>
 
-<h2>🔐 Admin Header</h2>
+<h2>Admin Header</h2>
 <pre>
 X-Admin-Secret: your_secret
 </pre>
@@ -165,7 +129,7 @@ X-Admin-Secret: your_secret
 
 <hr>
 
-<h2>🧠 Scoring Logic</h2>
+<h2>Scoring Logic</h2>
 <pre>
 calculated_score = ceil(score_up × 3.14)
 </pre>
@@ -183,7 +147,7 @@ calculated_score = ceil(score_up × 3.14)
 
 <hr>
 
-<h2>💾 Backups</h2>
+<h2>Backups</h2>
 <ul>
   <li>Auto backup every 6 hours</li>
   <li>Keeps last 10 backups</li>
@@ -192,7 +156,7 @@ calculated_score = ceil(score_up × 3.14)
 
 <hr>
 
-<h2>⚠️ Notes</h2>
+<h2>Notes</h2>
 <ul>
   <li>Requires valid upstream API credentials</li>
   <li>Uses SQLite WAL mode</li>
@@ -201,7 +165,7 @@ calculated_score = ceil(score_up × 3.14)
 
 <hr>
 
-<h2>📜 License</h2>
+<h2>License</h2>
 <p>MIT</p>
 
 </body>
