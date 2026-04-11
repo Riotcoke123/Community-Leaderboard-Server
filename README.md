@@ -127,7 +127,7 @@ calculated_score = ceil(score_up × 3.14)
 
 <hr>
 
-<h2>🛡️ Security</h2>
+<h2>Security</h2>
 <ul>
   <li>Helmet HTTP headers</li>
   <li>Rate limiting (public + admin)</li>
@@ -156,7 +156,7 @@ calculated_score = ceil(score_up × 3.14)
 
 <hr>
 
-<h2>📜 License</h2>
+<h2>License</h2>
 
 <p>
 This project is licensed under the
@@ -176,7 +176,7 @@ https://www.gnu.org/licenses/gpl-3.0.en.html
 </p>
 
 <p>
-📦 Source Code Repository:<br>
+Source Code Repository:<br>
 <a href="https://github.com/Riotcoke123/Community-Leaderboard-Server" target="_blank">
 https://github.com/Riotcoke123/Community-Leaderboard-Server
 </a>
