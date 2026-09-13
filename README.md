@@ -132,8 +132,38 @@ calculated_score = ceil(score_up × 3.14)
   <li>Helmet HTTP headers</li>
   <li>Rate limiting (public + admin)</li>
   <li>CORS whitelist support</li>
-  <li>Admin secret authentication</li>
+  <li>Admin secret authentication (constant-time comparison, resistant to timing attacks)</li>
   <li>Request size limits</li>
+  <li>Path-traversal-safe backup downloads (whitelisted types, resolved-path verification)</li>
+  <li>Upstream API credentials never written to logs (errors are sanitized before logging)</li>
+  <li>Static file serving denies dotfiles (<code>.env</code>, etc.)</li>
+</ul>
+
+<hr>
+
+<h2>Security Notes for Self-Hosters</h2>
+<ul>
+  <li>
+    <strong>Systemd installs:</strong> <code>install-service.sh</code> now writes <code>ADMIN_SECRET</code>
+    and other config to a root-owned, mode-600 <code>data/leaderboard.env</code> file referenced via
+    <code>EnvironmentFile=</code>, instead of embedding it directly in
+    <code>/etc/systemd/system/leaderboard.service</code>. Unit files under
+    <code>/etc/systemd/system</code> are world-readable (0644) by default, so an inline
+    <code>Environment=ADMIN_SECRET=...</code> line would leak the secret to any local user
+    (e.g. via <code>systemctl cat leaderboard</code>).
+  </li>
+  <li>
+    <strong>PM2 / <code>ecosystem.config.js</code>:</strong> this file is meant to be committed, so it no
+    longer hardcodes a real-looking secret. It now reads <code>ADMIN_SECRET</code> (and other config)
+    from <code>process.env</code> at launch — set these in a gitignored <code>.env</code> or your shell
+    before running <code>pm2 start ecosystem.config.js</code>. If you previously committed a real
+    <code>ADMIN_SECRET</code> in this file, treat it as compromised, rotate it, and consider scrubbing
+    it from git history.
+  </li>
+  <li>
+    <strong>Never commit a filled-in <code>.env</code>.</strong> <code>.gitignore</code> now also excludes
+    <code>*.env</code> and <code>data/</code> (where the systemd installer stores its env file).
+  </li>
 </ul>
 
 <hr>
