@@ -31,3 +31,6 @@ build/
 
 # Coverage reports
 coverage/
+
+# Self-update system (pending upload staging area)
+updates/
