@@ -1,50 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+# Community Leaderboard Server
 
-</head>
-<body>
-
-<h1>Community Leaderboard Server</h1>
-
-<p>
 A high-performance Node.js + Express backend that aggregates posts from multiple communities,
-calculates weighted scores, and builds a live leaderboard using SQLite.
-</p>
+calculates weighted scores, and builds a live leaderboard using SQLite. Includes a
+password-protected admin panel with a safe, self-validating update system for deploying
+code changes without SSH access.
 
-<hr>
+---
 
-<h2>Features</h2>
-<ul>
-  <li>Auto-fetch posts from configured communities</li>
-  <li>Custom score calculation (score × 3.14)</li>
-  <li>Live aggregated leaderboard per author</li>
-  <li>SQLite database with WAL mode</li>
-  <li>Auto-refresh every 70 seconds</li>
-  <li>Automatic backups every 6 hours</li>
-  <li>Author tracking + eviction system</li>
-  <li>Secure admin API with secret auth</li>
-  <li>Security hardening (Helmet, CORS, rate limits)</li>
-</ul>
+## Features
 
-<hr>
+- Auto-fetch posts from configured communities
+- Custom score calculation (score × 3.14)
+- Live aggregated leaderboard per author
+- SQLite database with WAL mode
+- Auto-refresh every 70 seconds
+- Automatic DB backups every 6 hours
+- Author tracking + eviction system
+- Secure admin API with secret auth (header-based, for scripts/automation)
+- **Admin panel** with session-based login (browser UI)
+- **Self-update system** — upload a zip from the admin panel and deploy it live, with
+  automatic backup, validation, and rollback on failure
+- Security hardening (Helmet, CORS, rate limits, CSP)
 
-<h2>Project Structure</h2>
-<pre>
+---
+
+## Project Structure
+
+```
 .
 ├── server.js
-├── leaderboard.db
-├── backups/
+├── package.json
 ├── .env
-└── public/
-</pre>
+├── .gitignore
+├── views/
+│   ├── admin.html            # admin panel (session-gated)
+│   └── admin-login.html      # admin login form
+├── public/
+│   ├── index.html
+│   ├── css/style.css
+│   ├── js/leaderboard.js
+│   └── admin/
+│       ├── admin.css
+│       ├── admin.js
+│       └── login.js
+├── updates/pending/          # transient — staged uploads awaiting apply (gitignored)
+├── backups/                  # DB backups + code backups (gitignored)
+└── leaderboard.db            # SQLite database (gitignored)
+```
 
-<hr>
+---
 
-<h2>Environment Variables</h2>
-<pre>
+## Environment Variables
+
+```
 PORT=3001
 DB_PATH=./leaderboard.db
 ADMIN_SECRET=your_super_secure_admin_secret
@@ -56,28 +64,36 @@ X_API_SECRET=your_secret
 X_XSRF_TOKEN=your_token
 CORS_ORIGINS=http://localhost:3000,https://yourdomain.com
 BACKUP_DIR=./backups
-</pre>
+```
 
-<hr>
+`ADMIN_SECRET` doubles as both the `X-Admin-Secret` header value for scripted API access
+**and** the admin panel login password. It must be at least 16 characters — the server
+refuses to start otherwise. Use a long, random value and don't reuse it elsewhere.
 
-<h2>Running the Server</h2>
-<pre>
+---
+
+## Running the Server
+
+```
+npm install
 node server.js
-</pre>
+```
 
-<p>Dev mode:</p>
-<pre>
+Dev mode:
+
+```
 npx nodemon server.js
-</pre>
+```
 
-<hr>
+---
 
-<h2>API Endpoints</h2>
+## Public API Endpoints
 
-<h3>GET /api/leaderboard</h3>
-<div class="box">
+### GET /api/leaderboard
+
 Returns ranked authors by score.
-<pre>
+
+```json
 [
   {
     "author": "user123",
@@ -87,136 +103,154 @@ Returns ranked authors by score.
     "last_active_ago": "2 hours ago"
   }
 ]
-</pre>
-</div>
+```
 
-<h3>GET /api/stats</h3>
-<div class="box">
-<pre>
+### GET /api/stats
+
+```json
 {
   "totalPosts": 1200,
   "totalAuthors": 85,
   "authorCap": 500
 }
-</pre>
-</div>
+```
 
-<hr>
+---
 
-<h2>Admin Header</h2>
-<pre>
-X-Admin-Secret: your_secret
-</pre>
+## Admin API (header auth)
 
-<ul>
-  <li>GET /api/authors</li>
-  <li>POST /api/refresh</li>
-  <li>POST /api/reset</li>
-  <li>POST /api/nuke</li>
-  <li>POST /api/backup</li>
-  <li>/api/backup/download/db</li>
-  <li>/api/backup/download/json</li>
-</ul>
+Send `X-Admin-Secret: your_secret` on each request. Useful for scripts, cron jobs, or
+CI — no browser session required.
 
-<hr>
+- `GET  /api/authors`
+- `POST /api/refresh`
+- `POST /api/reset`
+- `POST /api/nuke`
+- `POST /api/backup`
+- `GET  /api/backup/download/db`
+- `GET  /api/backup/download/json`
 
-<h2>Scoring Logic</h2>
-<pre>
+---
+
+## Admin Panel (browser)
+
+Visit `/admin/login` and sign in with `ADMIN_SECRET` as the password. This starts a
+30-minute-idle / 4-hour-max session (`httpOnly`, `SameSite=Strict` cookie) that also
+satisfies the admin API endpoints above — no need to know or paste the raw secret into
+every request from the browser.
+
+From `/admin` you can:
+
+- Trigger a refresh, create a backup, soft-reset, or nuke-and-rebuild the DB
+- **Deploy an update** (see below)
+- Manually roll back to any retained code backup
+
+### Deploying an update
+
+1. Upload a `.zip` — either the **full project** or just the **changed files**, preserving
+   their folder structure. Zip paths must be relative to the project root (e.g. `server.js`,
+   `public/admin/admin.js`) — no wrapping top-level folder.
+2. The server validates every entry before touching disk: no path traversal, no symlinks,
+   no writes to `node_modules/`, `.git/`, `data/`, `backups/`, `updates/`, or `.env`, and
+   per-file / total size caps.
+3. Review the staged file list, then re-enter your admin password and click **Apply**.
+4. The server, in order:
+   - backs up the database
+   - zips up the current codebase (code backup, kept alongside DB backups, last 10 retained)
+   - writes the new files
+   - runs `npm install` if `package.json`/`package-lock.json` changed
+   - runs `node --check` on every `.js` file in the project
+   - boots an isolated copy of the server on a scratch port and scratch database to confirm
+     it actually starts (the **live** process is never touched by this step)
+5. If every check passes, it restarts itself so your process manager (PM2, Docker, or
+   systemd — all of which are configured in this repo with auto-restart) brings the server
+   back up running the new code.
+6. If **any** check fails, the code backup from step 4 is restored automatically, the live
+   process is never restarted, and you get an error explaining what failed. Nothing about
+   the running server changes until a validated update passes every check.
+
+The uploaded zip and any abandoned/expired uploads are cleaned up automatically.
+
+---
+
+## Scoring Logic
+
+```
 calculated_score = ceil(score_up × 3.14)
-</pre>
+```
 
-<hr>
+---
 
-<h2>Security</h2>
-<ul>
-  <li>Helmet HTTP headers</li>
-  <li>Rate limiting (public + admin)</li>
-  <li>CORS whitelist support</li>
-  <li>Admin secret authentication (constant-time comparison, resistant to timing attacks)</li>
-  <li>Request size limits</li>
-  <li>Path-traversal-safe backup downloads (whitelisted types, resolved-path verification)</li>
-  <li>Upstream API credentials never written to logs (errors are sanitized before logging)</li>
-  <li>Static file serving denies dotfiles (<code>.env</code>, etc.)</li>
-</ul>
+## Security
 
-<hr>
+- Helmet HTTP headers + strict Content-Security-Policy
+- Rate limiting (public, admin API, and a separate strict limiter for login/update-apply)
+- CORS whitelist support
+- Admin secret authentication via constant-time comparison (header **or** session cookie)
+- Password re-confirmation required before an update is applied or rolled back, even with
+  an active session
+- Request size limits (JSON body, uploaded zip, per-file and total zip contents)
+- Path-traversal-safe backup downloads and update-file writes (whitelisted types/paths,
+  resolved-path verification)
+- Update packages are validated for path traversal and symlinks before any file is written
+- Upstream API credentials never written to logs (errors are sanitized before logging)
+- Static file serving denies dotfiles (`.env`, etc.)
+- Dependencies audited with `npm audit` — currently 0 known vulnerabilities
 
-<h2>Security Notes for Self-Hosters</h2>
-<ul>
-  <li>
-    <strong>Systemd installs:</strong> <code>install-service.sh</code> now writes <code>ADMIN_SECRET</code>
-    and other config to a root-owned, mode-600 <code>data/leaderboard.env</code> file referenced via
-    <code>EnvironmentFile=</code>, instead of embedding it directly in
-    <code>/etc/systemd/system/leaderboard.service</code>. Unit files under
-    <code>/etc/systemd/system</code> are world-readable (0644) by default, so an inline
-    <code>Environment=ADMIN_SECRET=...</code> line would leak the secret to any local user
-    (e.g. via <code>systemctl cat leaderboard</code>).
-  </li>
-  <li>
-    <strong>PM2 / <code>ecosystem.config.js</code>:</strong> this file is meant to be committed, so it no
-    longer hardcodes a real-looking secret. It now reads <code>ADMIN_SECRET</code> (and other config)
-    from <code>process.env</code> at launch — set these in a gitignored <code>.env</code> or your shell
-    before running <code>pm2 start ecosystem.config.js</code>. If you previously committed a real
-    <code>ADMIN_SECRET</code> in this file, treat it as compromised, rotate it, and consider scrubbing
-    it from git history.
-  </li>
-  <li>
-    <strong>Never commit a filled-in <code>.env</code>.</strong> <code>.gitignore</code> now also excludes
-    <code>*.env</code> and <code>data/</code> (where the systemd installer stores its env file).
-  </li>
-</ul>
+---
 
-<hr>
+## Security Notes for Self-Hosters
 
-<h2>Backups</h2>
-<ul>
-  <li>Auto backup every 6 hours</li>
-  <li>Keeps last 10 backups</li>
-  <li>Exports authors to JSON</li>
-</ul>
+- **Systemd installs:** `install-service.sh` writes `ADMIN_SECRET` and other config to a
+  root-owned, mode-600 `data/leaderboard.env` file referenced via `EnvironmentFile=`,
+  instead of embedding it directly in `/etc/systemd/system/leaderboard.service`. Unit files
+  under `/etc/systemd/system` are world-readable (0644) by default, so an inline
+  `Environment=ADMIN_SECRET=...` line would leak the secret to any local user (e.g. via
+  `systemctl cat leaderboard`).
+- **PM2 / `ecosystem.config.js`:** this file is meant to be committed, so it doesn't
+  hardcode a real secret. It reads `ADMIN_SECRET` (and other config) from `process.env` at
+  launch — set these in a gitignored `.env` or your shell before running
+  `pm2 start ecosystem.config.js`. If you previously committed a real `ADMIN_SECRET` in this
+  file, treat it as compromised, rotate it, and consider scrubbing it from git history.
+- **Never commit a filled-in `.env`.** `.gitignore` also excludes `*.env`, `data/` (where
+  the systemd installer stores its env file), and `updates/` (transient update staging).
+- **The admin password is a deploy key.** Anyone with it can write files to your server
+  through the update system. Treat it accordingly — long, random, and not reused.
 
-<hr>
+---
 
-<h2>Notes</h2>
-<ul>
-  <li>Requires valid upstream API credentials</li>
-  <li>Uses SQLite WAL mode</li>
-  <li>Auto-refresh every 70 seconds</li>
-</ul>
+## Backups
 
-<hr>
+- Auto DB backup every 6 hours; keeps last 10
+- Code backup created automatically before every applied update; keeps last 10
+- Authors exported to JSON alongside each DB backup
 
-<h2>License</h2>
+---
 
-<p>
-This project is licensed under the
-<strong>GNU General Public License v3.0 (GPL-3.0)</strong>.
-</p>
+## Notes
 
-<p>
-You are free to use, modify, and distribute this software under the terms of the GPL-3.0 license,
-provided that any derivative work is also distributed under the same license.
-</p>
+- Requires valid upstream API credentials
+- Uses SQLite WAL mode
+- Auto-refresh every 70 seconds
+- Single-instance only (`exec_mode: "fork"`, `instances: 1` in `ecosystem.config.js`) —
+  admin sessions and update staging are held in memory, not a shared store
 
-<p>
-Full license text available here:<br>
-<a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">
+---
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
+
+You are free to use, modify, and distribute this software under the terms of the GPL-3.0
+license, provided that any derivative work is also distributed under the same license.
+
+Full license text available here:
 https://www.gnu.org/licenses/gpl-3.0.en.html
-</a>
-</p>
 
-<p>
-Source Code Repository:<br>
-<a href="https://github.com/Riotcoke123/Community-Leaderboard-Server" target="_blank">
+Source Code Repository:
 https://github.com/Riotcoke123/Community-Leaderboard-Server
-</a>
-</p>
 
-<p>
 This software is provided "as is", without warranty of any kind, express or implied,
-including but not limited to the warranties of merchantability, fitness for a particular purpose,
-and noninfringement. In no event shall the authors or copyright holders be liable for any claim,
-damages, or other liability arising from the use of this software.
-</p>
-</body>
-</html>
+including but not limited to the warranties of merchantability, fitness for a particular
+purpose, and noninfringement. In no event shall the authors or copyright holders be liable
+for any claim, damages, or other liability arising from the use of this software.
