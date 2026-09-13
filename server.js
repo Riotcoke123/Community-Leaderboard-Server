@@ -5,6 +5,7 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const pino = require('pino');
 const fs = require('fs');
+const crypto = require('crypto');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
@@ -172,6 +173,19 @@ function exportAuthorsJSON() {
 // =========================
 const calculateScore = score => Math.ceil(score * 3.14);
 
+// Strip an axios error down to safe-to-log fields only. Axios errors carry
+// the full outgoing request config (including our upstream x-api-key /
+// x-api-secret / x-xsrf-token headers) as an enumerable property, so logging
+// the raw error object would leak those secrets into log files/stdout.
+function sanitizeAxiosError(err) {
+  return {
+    message: err.message,
+    code: err.code,
+    status: err.response ? err.response.status : undefined,
+    statusText: err.response ? err.response.statusText : undefined
+  };
+}
+
 function timeAgoFromMs(epochMs) {
   const nowMs = Date.now();
   const diffSec = Math.floor((nowMs - epochMs) / 1000);
@@ -217,7 +231,9 @@ async function fetchPostsForCommunity(community) {
 
     return posts.map(p => ({ ...p, _community: community }));
   } catch (err) {
-    logger.error({ err, community }, 'Error fetching posts for community');
+    // Log a sanitized error only — never the raw axios error, since it
+    // carries the upstream API credentials in err.config.headers.
+    logger.error({ err: sanitizeAxiosError(err), community }, 'Error fetching posts for community');
     return [];
   }
 }
@@ -496,9 +512,25 @@ const adminLimiter = rateLimit({
 // =========================
 // Protects destructive admin endpoints.
 // Callers must send:  X-Admin-Secret: <your-secret>  header
+const ADMIN_SECRET_BUF = Buffer.from(ADMIN_SECRET, 'utf8');
+
 function requireAdmin(req, res, next) {
   const provided = req.headers['x-admin-secret'];
-  if (!provided || provided !== ADMIN_SECRET) {
+
+  // Constant-time comparison: a plain `!==` compare on strings short-circuits
+  // at the first differing byte, which leaks timing information an attacker
+  // can use to recover the secret one character at a time. crypto.timingSafeEqual
+  // avoids that, but it throws if the buffers differ in length — so we compare
+  // against a fixed-length hash of both values first to keep the length itself
+  // from being a timing side-channel too.
+  let authorized = false;
+  if (typeof provided === 'string' && provided.length > 0) {
+    const providedHash = crypto.createHash('sha256').update(provided, 'utf8').digest();
+    const secretHash = crypto.createHash('sha256').update(ADMIN_SECRET_BUF).digest();
+    authorized = crypto.timingSafeEqual(providedHash, secretHash);
+  }
+
+  if (!authorized) {
     logger.warn({ ip: req.ip, path: req.path }, 'Unauthorized admin attempt');
     return res.status(401).json({ error: 'Unauthorized' });
   }
