@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — Leaderboard</title>
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; object-src 'none'; frame-ancestors 'none';">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body class="admin-body admin-login-body">
+  <div class="login-card">
+    <h1>Admin Login</h1>
+    <p class="muted">Community Leaderboard Server</p>
+    <form id="loginForm" autocomplete="off">
+      <label for="password">Admin password</label>
+      <input type="password" id="password" name="password" autocomplete="current-password" required autofocus>
+      <button type="submit">Log in</button>
+      <div id="loginError" class="error-msg" role="alert"></div>
+    </form>
+  </div>
+  <script src="/admin/login.js"></script>
+</body>
+</html>

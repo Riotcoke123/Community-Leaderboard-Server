@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — Leaderboard</title>
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; object-src 'none'; frame-ancestors 'none';">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <header class="admin-header">
+      <h1>Leaderboard Admin</h1>
+      <button id="logoutBtn" class="btn btn-ghost">Log out</button>
+    </header>
 
+    <section class="card">
+      <h2>Server actions</h2>
+      <div class="btn-row">
+        <button id="refreshBtn" class="btn">Force refresh data</button>
+        <button id="backupBtn" class="btn">Create backup now</button>
+        <button id="resetBtn" class="btn btn-warn">Soft reset (wipe data)</button>
+        <button id="nukeBtn" class="btn btn-danger">Nuke &amp; rebuild DB</button>
+      </div>
+      <div id="actionStatus" class="status-msg"></div>
+    </section>
+
+    <section class="card">
+      <h2>Deploy an update</h2>
+      <p class="muted">Upload the full project zip or a changed-files-only zip (same folder structure). Files are validated, backed up, syntax-checked, and boot-tested in isolation before anything touches the live server.</p>
+
+      <div class="dropzone" id="dropzone">
+        <p>Drag a .zip here, or</p>
+        <input type="file" id="fileInput" accept=".zip" hidden>
+        <button id="chooseFileBtn" class="btn">Choose file</button>
+      </div>
+
+      <div id="uploadResult" class="upload-result" hidden>
+        <h3>Package staged <span id="packageKind" class="badge"></span></h3>
+        <div class="file-list" id="fileList"></div>
+        <p class="muted" id="fileCountSummary"></p>
+
+        <div class="apply-box">
+          <label for="applyPassword">Confirm admin password to apply</label>
+          <input type="password" id="applyPassword" autocomplete="current-password" placeholder="Admin password">
+          <div class="btn-row">
+            <button id="applyBtn" class="btn btn-primary">Apply update</button>
+            <button id="cancelUploadBtn" class="btn btn-ghost">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="updateStatus" class="status-msg"></div>
+    </section>
+
+    <section class="card">
+      <h2>Rollback</h2>
+      <p class="muted">A failed update is rolled back automatically. Use this only if you need to manually revert to an earlier backup.</p>
+      <div class="btn-row">
+        <select id="backupSelect"></select>
+        <button id="loadBackupsBtn" class="btn">Refresh list</button>
+      </div>
+      <div class="apply-box">
+        <label for="rollbackPassword">Confirm admin password to roll back</label>
+        <input type="password" id="rollbackPassword" autocomplete="current-password" placeholder="Admin password">
+        <button id="rollbackBtn" class="btn btn-danger">Roll back to selected backup</button>
+      </div>
+      <div id="rollbackStatus" class="status-msg"></div>
+    </section>
+  </div>
+
+  <script src="/admin/admin.js"></script>
+</body>
+</html>
